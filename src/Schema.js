@@ -15,7 +15,6 @@
 // TODO: hide all schema logic inside the database adapter.
 
 var Parse = require('parse/node').Parse;
-var transform = require('./transform');
 
 const defaultColumns = Object.freeze({
   // Contain the default columns for every parse object type (except _Join collection)
@@ -416,7 +415,7 @@ class Schema {
   // If 'freeze' is true, refuse to update the schema for this field.
   validateField(className, key, type, freeze) {
     // Just to check that the key is valid
-    transform.transformKey(this, className, key);
+    this._collection.transform.transformKey(this, className, key);
 
     if( key.indexOf(".") > 0 ) {
       // subdocument key (x.y) => ok if x is of type 'object'

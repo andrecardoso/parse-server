@@ -1,5 +1,6 @@
 
 import MongoCollection from './MongoCollection';
+import * as transform from './MongoTransform';
 
 function _mongoSchemaQueryFromNameQuery(name: string, query) {
   return _mongoSchemaObjectFromNameFields(name, query);
@@ -54,5 +55,9 @@ export default class MongoSchemaCollection {
 
   upsertSchema(name: string, query: string, update) {
     return this._collection.upsertOne(_mongoSchemaQueryFromNameQuery(name, query), update);
+  }
+
+  get transform() {
+    return transform;
   }
 }
