@@ -1,5 +1,7 @@
 import { md5Hash, newObjectId } from './cryptoUtils';
 
+const PUSH_STATUS_COLLECTION = '_PushStatus';
+
 export function flatten(array) {
   return array.reduce((memo, element) => {
     if (Array.isArray(element)) {
@@ -16,9 +18,7 @@ export default function pushStatusHandler(config) {
   let initialPromise;
   let pushStatus;
 
-  let collection = function() {
-    return config.database.adaptiveCollection('_PushStatus');
-  }
+  let database = config.database.Unsafe();
 
   let setInitial = function(body, where, options = {source: 'rest'}) {
     let now = new Date();
@@ -38,23 +38,19 @@ export default function pushStatusHandler(config) {
       _wperm: [],
       _rperm: []
     }
-    initialPromise = collection().then((collection) => {
-      return collection.insertOne(object);
-    }).then((res) => {
+
+    return database.create(PUSH_STATUS_COLLECTION, object).then(() => {
       pushStatus = {
         objectId: object.objectId
       };
       return Promise.resolve(pushStatus);
-    })
-    return initialPromise;
+    });
   }
 
   let setRunning = function() {
-    return initialPromise.then(() => {
-      return collection();
-    }).then((collection) => {
-      return collection.updateOne({status:"pending", objectId: pushStatus.objectId}, {$set: {status: "running"}});
-   });
+    return database.update(PUSH_STATUS_COLLECTION,
+      {status:"pending", objectId: pushStatus.objectId},
+      {status: "running"});
   }
 
   let complete = function(results) {
@@ -86,12 +82,7 @@ export default function pushStatusHandler(config) {
         return memo;
       }, update);
     }
-
-    return initialPromise.then(() => {
-      return collection();
-    }).then((collection) => {
-      return collection.updateOne({status:"running", objectId: pushStatus.objectId}, {$set: update});
-    });
+    return database.update('_PushStatus', {status:"running", objectId: pushStatus.objectId}, update);
   }
 
   return Object.freeze({

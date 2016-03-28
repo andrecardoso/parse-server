@@ -212,7 +212,10 @@ describe("Email Verification", () => {
         .then((user) => {
           return user.save();
         }).then((user) => {
-          return Parse.User.requestPasswordReset("cool_guy@parse.com");
+          return Parse.User.requestPasswordReset("cool_guy@parse.com").catch((err) => {
+            fail('Should not fail requesting a password');
+            done();
+          })
         }).then(() => {
           expect(calls).toBe(2);
           done();
@@ -497,7 +500,7 @@ describe("Password Reset", () => {
       Parse.User.requestPasswordReset('user@parse.com', {
         error: (err) => {
           console.error(err);
-          fail("Should not fail");
+          fail("Should not fail requesting a password");
           done();
         }
       });
@@ -574,7 +577,7 @@ describe("Password Reset", () => {
 
             Parse.User.logIn("zxcv", "hello").then(function(user){
               let config = new Config('test');
-              config.database.adaptiveCollection('_User')
+              config.database.adapter.adaptiveCollection(config.database.collectionPrefix+'_User')
               .then(coll => coll.find({ 'username': 'zxcv' }, { limit: 1 }))
               .then((results) => {
                 // _perishable_token should be unset after reset password

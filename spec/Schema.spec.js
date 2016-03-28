@@ -630,7 +630,10 @@ describe('Schema', () => {
         done();
         Parse.Object.enableSingleInstance();
       });
-    });
+    }).catch(err => {
+      console.error(err);
+      done();
+    })
   });
 
   it('can delete pointer fields and resave as string', done => {
