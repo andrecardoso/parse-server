@@ -56,7 +56,7 @@ export class PushController extends AdaptableController {
     if (body.data && body.data.badge) {
       let badge = body.data.badge;
       let op = {};
-      if (badge == "Increment") {
+      if (badge.toLowerCase() === 'increment') {
         op = { $inc: { badge: 1 } }
       } else if (Number(badge)) {
         op = { $set: { badge: badge } }
